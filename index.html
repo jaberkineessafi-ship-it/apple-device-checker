@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Device Checker - macOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --secondary-color: #5AC8FA;
+            --dark-color: #1D1D1F;
+            --light-color: #F5F5F7;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --border-radius: 10px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .checker-section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin: 30px 0;
+        }
+
+        .section-title {
+            margin-bottom: 25px;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid transparent;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .device-info {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-eligible {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-ineligible {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .ad-top, .ad-bottom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 122, 255, 0.2);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 50px 0 30px;
+            margin-top: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fab fa-apple"></i>
+                    <span>Apple Device Checker</span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> Accueil</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> À propos</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="ad-top">
+            <i class="fas fa-gift"></i> PROMOTION EXCLUSIVE - Économisez 30% sur les accessoires Apple
+        </div>
+
+        <div class="checker-section">
+            <h2 class="section-title">Vérifiez votre appareil Apple</h2>
+            
+            <div class="input-group">
+                <label for="serial-number"><i class="fas fa-barcode"></i> Numéro de série</label>
+                <input type="text" id="serial-number" placeholder="Ex: F2LXXXXXXX">
+            </div>
+            
+            <button class="btn" id="check-device">
+                <i class="fas fa-search"></i> Vérifier l'appareil
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Recherche des informations en cours...</p>
+            </div>
+
+            <div class="device-info" id="device-info">
+                <h3 class="section-title">Informations détaillées de l'appareil</h3>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-title">Modèle détaillé</div>
+                        <div class="info-value" id="model">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Statut d'activation</div>
+                        <div class="info-value">
+                            <span class="status-badge" id="activation-status">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Statut de garantie</div>
+                        <div class="info-value" id="warranty-status">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Support téléphonique technique</div>
+                        <div class="info-value" id="support-status">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Couverture des réparations</div>
+                        <div class="info-value" id="repair-status">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Expiration des réparations</div>
+                        <div class="info-value" id="repair-expiry">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Éligibilité AppleCare</div>
+                        <div class="info-value">
+                            <span class="status-badge" id="applecare-status">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Rapport créé le</div>
+                        <div class="info-value" id="report-date">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Verrouillage SIM</div>
+                        <div class="info-value" id="sim-lock">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Opérateur</div>
+                        <div class="info-value" id="carrier">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Stockage</div>
+                        <div class="info-value" id="storage">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">État de la batterie (cycles)</div>
+                        <div class="info-value" id="battery-cycle">-</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-title">Version iOS/macOS</div>
+                        <div class="info-value" id="os-version">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-bottom">
+            <i class="fas fa-star"></i> NEWSLETTER - Recevez 10% de réduction
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p style="text-align: center;">&copy; 2024 Apple Device Checker. Créé sur macOS.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkDeviceBtn = document.getElementById('check-device');
+            const serialNumberInput = document.getElementById('serial-number');
+            const deviceInfoSection = document.getElementById('device-info');
+            const loadingIndicator = document.getElementById('loading');
+            
+            checkDeviceBtn.addEventListener('click', function() {
+                const serialNumber = serialNumberInput.value.trim();
+                
+                if (serialNumber === '') {
+                    alert('Veuillez entrer un numéro de série valide');
+                    return;
+                }
+                
+                // Afficher l'indicateur de chargement
+                loadingIndicator.style.display = 'block';
+                deviceInfoSection.style.display = 'none';
+                
+                // Simuler un délai de chargement
+                setTimeout(function() {
+                    loadingIndicator.style.display = 'none';
+                    deviceInfoSection.style.display = 'block';
+                    
+                    // Générer des données d'appareil simulées
+                    const deviceData = generateDeviceData(serialNumber);
+                    updateDeviceInfo(deviceData);
+                }, 1500);
+            });
+            
+            function generateDeviceData(serial) {
+                const isActive = Math.random() > 0.1;
+                const hasWarranty = Math.random() > 0.3;
+                const isEligible = Math.random() > 0.2;
+                const isSimLocked = Math.random() > 0.7;
+                
+                const expirationDate = new Date();
+                expirationDate.setMonth(expirationDate.getMonth() + Math.floor(Math.random() * 12));
+                
+                const models = [
+                    'iPhone 15 Pro Max 512 Go',
+                    'iPhone 15 Pro 256 Go', 
+                    'iPhone 14 128 Go',
+                    'MacBook Pro 16" M3 Max',
+                    'iMac 24" M3',
+                    'Apple Watch Series 9'
+                ];
+                
+                const osVersions = [
+                    'iOS 17.4.1',
+                    'iOS 17.3.2',
+                    'macOS Sonoma 14.4',
+                    'watchOS 10.4'
+                ];
+                
+                return {
+                    model: models[Math.floor(Math.random() * models.length)],
+                    activationStatus: isActive ? 'Activé' : 'Non activé',
+                    warrantyStatus: hasWarranty ? 'Garantie active' : 'Garantie expirée',
+                    supportStatus: hasWarranty ? 'Support actif' : 'Support expiré',
+                    repairStatus: hasWarranty ? 'Couverture active' : 'Couverture expirée',
+                    repairExpiry: expirationDate.toLocaleDateString('fr-FR'),
+                    applecareStatus: isEligible ? 'Éligible' : 'Non éligible',
+                    reportDate: new Date().toLocaleDateString('fr-FR'),
+                    simLock: isSimLocked ? 'Verrouillé' : 'Déverrouillé',
+                    carrier: isSimLocked ? 'Orange' : 'Aucun',
+                    storage: ['128 Go', '256 Go', '512 Go', '1 To'][Math.floor(Math.random() * 4)],
+                    batteryCycle: Math.floor(Math.random() * 300) + ' cycles',
+                    osVersion: osVersions[Math.floor(Math.random() * osVersions.length)]
+                };
+            }
+            
+            function updateDeviceInfo(data) {
+                document.getElementById('model').textContent = data.model;
+                document.getElementById('activation-status').textContent = data.activationStatus;
+                document.getElementById('activation-status').className = `status-badge ${data.activationStatus === 'Activé' ? 'status-active' : 'status-inactive'}`;
+                document.getElementById('warranty-status').textContent = data.warrantyStatus;
+                document.getElementById('support-status').textContent = data.supportStatus;
+                document.getElementById('repair-status').textContent = data.repairStatus;
+                document.getElementById('repair-expiry').textContent = data.repairExpiry;
+                document.getElementById('applecare-status').textContent = data.applecareStatus;
+                document.getElementById('applecare-status').className = `status-badge ${data.applecareStatus === 'Éligible' ? 'status-eligible' : 'status-ineligible'}`;
+                document.getElementById('report-date').textContent = data.reportDate;
+                document.getElementById('sim-lock').textContent = data.simLock;
+                document.getElementById('carrier').textContent = data.carrier;
+                document.getElementById('storage').textContent = data.storage;
+                document.getElementById('battery-cycle').textContent = data.batteryCycle;
+                document.getElementById('os-version').textContent = data.osVersion;
+            }
+            
+            // Exemple de numéro de série pour faciliter les tests
+            serialNumberInput.value = 'F2LXYZ123ABC';
+        });
+    </script>
+</body>
+</html>
